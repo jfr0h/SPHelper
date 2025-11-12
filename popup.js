@@ -1026,38 +1026,36 @@ function loadSnippets() {
                         <div style="font-size: 11px; color: var(--sn-text-secondary); margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--sn-border);">
                             ${fileTypes[file.fileType || 'general'].label}
                         </div>
-                        <pre style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0;">${escapeHtml(file.code)}</pre>
+                        <pre style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0; display: none;">${escapeHtml(file.code)}</pre>
                         <div style="display: flex; gap: 4px;">
-                            <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
-                            <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
-                            <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
+                            <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px; display: none;">📋 Copy</button>
+                            <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px; display: none;">✏️ Edit</button>
+                            <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px; display: none;">🗑️ Delete</button>
                         </div>
                     </div>
                 `;
             } else {
-                // Multiple file types - show tabs at the top
+                // Multiple file types - show tabs at the top (no content expanded on load)
                 html += `
                     <!-- File type tabs -->
                     <div style="display: flex; border-bottom: 1px solid var(--sn-border); background: white;">
                 `;
                 fileKeys.forEach((fileType, idx) => {
                     const file = snippet.files[fileType];
-                    const isActive = idx === 0;
                     html += `
-                        <button class="snippet-file-type-tab" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; padding: 10px 8px; border-right: ${idx < fileKeys.length - 1 ? '1px solid var(--sn-border)' : 'none'}; background: ${isActive ? 'var(--sn-secondary)' : 'white'}; color: ${isActive ? 'white' : 'var(--sn-text-primary)'}; border: none; cursor: pointer; font-size: 11px; font-weight: ${isActive ? 'bold' : 'normal'}; transition: all 0.2s;">
+                        <button class="snippet-file-type-tab" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; padding: 10px 8px; border-right: ${idx < fileKeys.length - 1 ? '1px solid var(--sn-border)' : 'none'}; background: white; color: var(--sn-text-primary); border: none; cursor: pointer; font-size: 11px; font-weight: normal; transition: all 0.2s;">
                             ${fileTypes[file.fileType].icon} ${fileTypes[file.fileType].label.split(' ')[1] || fileTypes[file.fileType].label}
                         </button>
                     `;
                 });
                 html += `</div>`;
 
-                // Tab contents area
+                // Tab contents area - all hidden on load
                 html += `<div style="padding: 10px 15px;">`;
                 fileKeys.forEach((fileType, idx) => {
                     const file = snippet.files[fileType];
-                    const isActive = idx === 0;
                     html += `
-                        <div class="snippet-file-type-content" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="${isActive ? 'display: block' : 'display: none'}; padding: 10px 0;">
+                        <div class="snippet-file-type-content" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="display: none; padding: 10px 0;">
                             <pre style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0;">${escapeHtml(file.code)}</pre>
                             <div style="display: flex; gap: 4px;">
                                 <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
@@ -1070,17 +1068,17 @@ function loadSnippets() {
                 html += `</div>`;
             }
         } else {
-            // Handle custom snippets with flat code property
+            // Handle custom snippets with flat code property (single file type)
             const code = snippet.code;
             const fileType = snippet.fileType || 'general';
 
             html += `
                 <div style="padding: 10px 15px;">
-                    <div style="font-size: 11px; color: var(--sn-text-secondary); margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--sn-border);">
+                    <div style="font-size: 11px; color: var(--sn-text-secondary); margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--sn-border); cursor: pointer;" class="snippet-file-type-label-toggle" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">
                         ${fileTypes[fileType].label}
                     </div>
-                    <pre style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0;">${escapeHtml(code || '')}</pre>
-                    <div style="display: flex; gap: 4px;">
+                    <pre class="snippet-single-file-code" data-snippet-id="${escapeHtml(id)}" style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0; display: none;">${escapeHtml(code || '')}</pre>
+                    <div class="snippet-single-file-actions" data-snippet-id="${escapeHtml(id)}" style="display: none; display: flex; gap: 4px;">
                         <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
                         <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
                         <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
@@ -1094,32 +1092,59 @@ function loadSnippets() {
 
     document.getElementById('snippetsView').innerHTML = html;
 
-    // Setup file type tab click handlers
+    // Setup file type tab click handlers (with toggle/unselect support)
     document.querySelectorAll('.snippet-file-type-tab').forEach(tab => {
         tab.addEventListener('click', function() {
             const snippetId = this.dataset.snippetId;
             const fileType = this.dataset.fileType;
             const container = this.closest('[style*="border: 1px solid"]');
+            const contentElement = container.querySelector(`[data-snippet-id="${snippetId}"][data-file-type="${fileType}"].snippet-file-type-content`);
 
-            // Deactivate all tabs in this container
-            container.querySelectorAll('.snippet-file-type-tab').forEach(t => {
-                t.style.background = 'white';
-                t.style.color = 'var(--sn-text-primary)';
-                t.style.fontWeight = 'normal';
-            });
+            // Check if this tab is already active
+            const isActive = this.style.background === 'var(--sn-secondary)';
 
-            // Hide all contents
-            container.querySelectorAll('.snippet-file-type-content').forEach(content => {
-                content.style.display = 'none';
-            });
+            if (isActive) {
+                // Unselect this tab
+                this.style.background = 'white';
+                this.style.color = 'var(--sn-text-primary)';
+                this.style.fontWeight = 'normal';
+                contentElement.style.display = 'none';
+            } else {
+                // Deactivate all tabs in this container
+                container.querySelectorAll('.snippet-file-type-tab').forEach(t => {
+                    t.style.background = 'white';
+                    t.style.color = 'var(--sn-text-primary)';
+                    t.style.fontWeight = 'normal';
+                });
 
-            // Activate clicked tab
-            this.style.background = 'var(--sn-secondary)';
-            this.style.color = 'white';
-            this.style.fontWeight = 'bold';
+                // Hide all contents
+                container.querySelectorAll('.snippet-file-type-content').forEach(content => {
+                    content.style.display = 'none';
+                });
 
-            // Show corresponding content
-            container.querySelector(`[data-snippet-id="${snippetId}"][data-file-type="${fileType}"].snippet-file-type-content`).style.display = 'block';
+                // Activate clicked tab
+                this.style.background = 'var(--sn-secondary)';
+                this.style.color = 'white';
+                this.style.fontWeight = 'bold';
+
+                // Show corresponding content
+                contentElement.style.display = 'block';
+            }
+        });
+    });
+
+    // Setup click handlers for single-file snippet toggles
+    document.querySelectorAll('.snippet-file-type-label-toggle').forEach(label => {
+        label.addEventListener('click', function() {
+            const snippetId = this.dataset.snippetId;
+            const codeElement = document.querySelector(`.snippet-single-file-code[data-snippet-id="${snippetId}"]`);
+            const actionsElement = document.querySelector(`.snippet-single-file-actions[data-snippet-id="${snippetId}"]`);
+
+            if (codeElement && actionsElement) {
+                const isHidden = codeElement.style.display === 'none';
+                codeElement.style.display = isHidden ? 'block' : 'none';
+                actionsElement.style.display = isHidden ? 'flex' : 'none';
+            }
         });
     });
 }
