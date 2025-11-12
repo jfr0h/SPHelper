@@ -1,9 +1,11 @@
-// Default snippets
+// Default snippets - grouped by pattern with multiple file types
 const defaultSnippets = {
-    'modal-embedded-widget-client': {
-        name: 'Modal with Embedded Widget - Client Script',
-        fileType: 'client',
-        code: `c.openModal = function() {
+    'modal-embedded-widget': {
+        name: 'Modal with Embedded Widget',
+        files: {
+            'client': {
+                fileType: 'client',
+                code: `c.openModal = function() {
     var modalOptions = {
         title: 'Widget Modal',
         template: 'path/to/template.html',
@@ -21,11 +23,10 @@ c.onModalClose = function(data) {
     console.log('Modal closed with data:', data);
     c.server.refresh();
 };`
-    },
-    'modal-embedded-widget-html': {
-        name: 'Modal with Embedded Widget - HTML Template',
-        fileType: 'html',
-        code: `<!-- Main widget template -->
+            },
+            'html': {
+                fileType: 'html',
+                code: `<!-- Main widget template -->
 <div class="widget-container">
     <button class="btn btn-primary" ng-click="c.openModal()">
         Open Modal
@@ -44,11 +45,15 @@ c.onModalClose = function(data) {
     <button class="btn btn-default" ng-click="$close()">Cancel</button>
     <button class="btn btn-primary" ng-click="$close(c.data.result)">Submit</button>
 </div>`
+            }
+        }
     },
-    'server-get-pattern-client': {
-        name: 'c.server.get() Pattern - Client Script',
-        fileType: 'client',
-        code: `c.loadData = function() {
+    'server-get-pattern': {
+        name: 'c.server.get() Pattern',
+        files: {
+            'client': {
+                fileType: 'client',
+                code: `c.loadData = function() {
     c.server.get({
         action: 'fetchData',
         id: c.data.itemId
@@ -64,11 +69,10 @@ c.onModalClose = function(data) {
 
 // Initialize on page load
 c.loadData();`
-    },
-    'server-get-pattern-server': {
-        name: 'c.server.get() Pattern - Server Script',
-        fileType: 'server',
-        code: `if (input.action === 'fetchData') {
+            },
+            'server': {
+                fileType: 'server',
+                code: `if (input.action === 'fetchData') {
     var recordId = input.id;
     var gr = new GlideRecord('incident');
 
@@ -84,11 +88,15 @@ c.loadData();`
         data.message = 'Record not found';
     }
 }`
+            }
+        }
     },
-    'server-refresh-pattern-client': {
-        name: 'c.server.refresh() Pattern - Client Script',
-        fileType: 'client',
-        code: `c.refreshData = function() {
+    'server-refresh-pattern': {
+        name: 'c.server.refresh() Pattern',
+        files: {
+            'client': {
+                fileType: 'client',
+                code: `c.refreshData = function() {
     // Refresh server script without passing new data
     c.server.refresh();
 };
@@ -108,11 +116,10 @@ var refreshInterval = setInterval(function() {
 c.$scope.$on('$destroy', function() {
     if (refreshInterval) clearInterval(refreshInterval);
 });`
-    },
-    'server-refresh-pattern-server': {
-        name: 'c.server.refresh() Pattern - Server Script',
-        fileType: 'server',
-        code: `// Server script runs automatically with refresh
+            },
+            'server': {
+                fileType: 'server',
+                code: `// Server script runs automatically with refresh
 var today = new Date();
 
 data.timestamp = today.toISOString();
@@ -123,11 +130,15 @@ var gr = new GlideRecord('sys_user');
 if (gr.get('sys_id', data.userId)) {
     data.userEmail = gr.email.toString();
 }`
+            }
+        }
     },
-    'table-filter-pagination-client': {
-        name: 'Table with Filter & Pagination - Client Script',
-        fileType: 'client',
-        code: `c.itemsPerPage = 5;
+    'table-filter-pagination': {
+        name: 'Table with Filter & Pagination',
+        files: {
+            'client': {
+                fileType: 'client',
+                code: `c.itemsPerPage = 5;
 c.currentPage = 1;
 c.data.records = [];
 c.data.filteredRecords = [];
@@ -183,11 +194,10 @@ c.$watch('c.data.searchTerm', function(newVal) {
 });
 
 c.loadRecords();`
-    },
-    'table-filter-pagination-html': {
-        name: 'Table with Filter & Pagination - HTML Template',
-        fileType: 'html',
-        code: `<div class="table-widget">
+            },
+            'html': {
+                fileType: 'html',
+                code: `<div class="table-widget">
     <!-- Search Input -->
     <div class="search-container">
         <input type="text"
@@ -238,11 +248,10 @@ c.loadRecords();`
         </nav>
     </div>
 </div>`
-    },
-    'table-filter-pagination-css': {
-        name: 'Table with Filter & Pagination - CSS/SCSS',
-        fileType: 'css',
-        code: `.table-widget {
+            },
+            'css': {
+                fileType: 'css',
+                code: `.table-widget {
     padding: 15px;
 }
 
@@ -304,11 +313,10 @@ table td {
     color: #ccc;
     cursor: not-allowed;
 }`
-    },
-    'table-filter-pagination-server': {
-        name: 'Table with Filter & Pagination - Server Script',
-        fileType: 'server',
-        code: `if (input.action === 'getAllRecords') {
+            },
+            'server': {
+                fileType: 'server',
+                code: `if (input.action === 'getAllRecords') {
     var records = [];
     var gr = new GlideRecord('incident');
     gr.addQuery('active', 'true');
@@ -328,11 +336,15 @@ table td {
     data.records = records;
     data.status = 'success';
 }`
+            }
+        }
     },
-    'graphql-endpoint-client': {
-        name: 'GraphQL $http Query - Client Script',
-        fileType: 'client',
-        code: `c.executeGraphQL = function(query, variables) {
+    'graphql-endpoint': {
+        name: 'GraphQL $http Query',
+        files: {
+            'client': {
+                fileType: 'client',
+                code: `c.executeGraphQL = function(query, variables) {
     var url = '/api/now/graphql';
 
     var payload = {
@@ -408,11 +420,10 @@ c.getIncidentById = function(incidentId) {
 
     c.executeGraphQL(query, { id: incidentId });
 };`
-    },
-    'graphql-endpoint-html': {
-        name: 'GraphQL $http Query - HTML Template',
-        fileType: 'html',
-        code: `<div class="graphql-widget">
+            },
+            'html': {
+                fileType: 'html',
+                code: `<div class="graphql-widget">
     <h3>GraphQL Query Widget</h3>
 
     <!-- Loading State -->
@@ -459,11 +470,10 @@ c.getIncidentById = function(incidentId) {
         </table>
     </div>
 </div>`
-    },
-    'graphql-endpoint-css': {
-        name: 'GraphQL $http Query - CSS/SCSS',
-        fileType: 'css',
-        code: `.graphql-widget {
+            },
+            'css': {
+                fileType: 'css',
+                code: `.graphql-widget {
     padding: 15px;
     max-width: 800px;
 }
@@ -544,6 +554,8 @@ c.getIncidentById = function(incidentId) {
     overflow-x: auto;
     max-height: 300px;
 }`
+            }
+        }
     }
 };
 
@@ -964,7 +976,8 @@ function setupSnippetHandlers() {
 
         if (copyBtn && copyBtn.closest('.snippet-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
             const snippetId = copyBtn.dataset.snippetId;
-            copySnippet(snippetId);
+            const fileType = copyBtn.dataset.fileType;
+            copySnippet(snippetId, fileType);
         } else if (editBtn && editBtn.closest('.snippet-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
             const snippetId = editBtn.dataset.snippetId;
             editSnippet(snippetId);
@@ -1021,60 +1034,36 @@ function loadFileTypeSnippets() {
         'server': { label: '⚙️ Server Script', icon: '⚙️' }
     };
 
-    // Group snippets by their display name (not by ID pattern)
-    const snippetsByName = {};
-
-    // Add all snippets (default and custom)
-    const allSnippets = { ...defaultSnippets };
-    Object.entries(customSnippets).forEach(([id, snippet]) => {
-        allSnippets[id] = { ...snippet, isDefault: false };
-    });
-
-    Object.entries(allSnippets).forEach(([id, snippet]) => {
-        const isCustom = id in customSnippets;
-        // Extract base name from snippet name (e.g., "Modal with Embedded Widget" from "Modal with Embedded Widget - Client Script")
-        const baseName = snippet.name.split(' - ')[0];
-
-        if (!snippetsByName[baseName]) {
-            snippetsByName[baseName] = [];
-        }
-        snippetsByName[baseName].push({ id, ...snippet, isDefault: !isCustom });
-    });
-
     let html = '';
 
-    Object.entries(snippetsByName).forEach(([baseName, snippets]) => {
-        // Sort snippets so file types are in consistent order
-        const fileTypeOrder = ['client', 'server', 'html', 'css', 'general'];
-        snippets.sort((a, b) => {
-            const aType = a.fileType || 'general';
-            const bType = b.fileType || 'general';
-            return fileTypeOrder.indexOf(aType) - fileTypeOrder.indexOf(bType);
-        });
+    // Process default snippets
+    Object.entries(defaultSnippets).forEach(([id, snippet]) => {
+        const defaultBadge = `<span style="font-size: 10px; background: var(--sn-secondary); color: white; padding: 2px 6px; border-radius: 2px; margin-left: 8px;">DEFAULT</span>`;
 
-        const defaultBadge = snippets.some(s => s.isDefault) ? `<span style="font-size: 10px; background: var(--sn-secondary); color: white; padding: 2px 6px; border-radius: 2px; margin-left: 8px;">DEFAULT</span>` : '';
-
-        // Single container for the entire snippet group
+        // Single container for the entire snippet
         html += `
             <div style="margin-bottom: 20px; border: 1px solid var(--sn-border); border-radius: 3px; overflow: hidden;">
                 <!-- Header with snippet name -->
                 <div style="padding: 12px 15px; background: var(--sn-bg-darker); border-bottom: 1px solid var(--sn-border);">
-                    <strong style="font-size: 13px;">${escapeHtml(baseName)}${defaultBadge}</strong>
+                    <strong style="font-size: 13px;">${escapeHtml(snippet.name)}${defaultBadge}</strong>
                 </div>
         `;
 
-        if (snippets.length === 1) {
+        const fileKeys = Object.keys(snippet.files);
+
+        if (fileKeys.length === 1) {
             // Single file type - no tabs needed
-            const snippet = snippets[0];
+            const fileType = fileKeys[0];
+            const file = snippet.files[fileType];
             html += `
                 <div style="padding: 10px 15px;">
                     <div style="font-size: 11px; color: var(--sn-text-secondary); margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--sn-border);">
-                        ${fileTypes[snippet.fileType || 'general'].label}
+                        ${fileTypes[file.fileType || 'general'].label}
                     </div>
                     <div style="display: flex; gap: 4px;">
-                        <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(snippet.id)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
-                        <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(snippet.id)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
-                        <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(snippet.id)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
+                        <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
+                        <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
+                        <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
                     </div>
                 </div>
             `;
@@ -1084,12 +1073,12 @@ function loadFileTypeSnippets() {
                 <!-- File type tabs -->
                 <div style="display: flex; border-bottom: 1px solid var(--sn-border); background: white;">
             `;
-            snippets.forEach((snippet, idx) => {
-                const fileType = snippet.fileType || 'general';
+            fileKeys.forEach((fileType, idx) => {
+                const file = snippet.files[fileType];
                 const isActive = idx === 0;
                 html += `
-                    <button class="snippet-file-type-tab" data-snippet-id="${escapeHtml(snippet.id)}" style="flex: 1; padding: 10px 8px; border-right: ${idx < snippets.length - 1 ? '1px solid var(--sn-border)' : 'none'}; background: ${isActive ? 'var(--sn-secondary)' : 'white'}; color: ${isActive ? 'white' : 'var(--sn-text-primary)'}; border: none; cursor: pointer; font-size: 11px; font-weight: ${isActive ? 'bold' : 'normal'}; transition: all 0.2s;">
-                        ${fileTypes[fileType].icon} ${fileTypes[fileType].label.split(' ')[1] || fileTypes[fileType].label}
+                    <button class="snippet-file-type-tab" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; padding: 10px 8px; border-right: ${idx < fileKeys.length - 1 ? '1px solid var(--sn-border)' : 'none'}; background: ${isActive ? 'var(--sn-secondary)' : 'white'}; color: ${isActive ? 'white' : 'var(--sn-text-primary)'}; border: none; cursor: pointer; font-size: 11px; font-weight: ${isActive ? 'bold' : 'normal'}; transition: all 0.2s;">
+                        ${fileTypes[file.fileType].icon} ${fileTypes[file.fileType].label.split(' ')[1] || fileTypes[file.fileType].label}
                     </button>
                 `;
             });
@@ -1097,14 +1086,14 @@ function loadFileTypeSnippets() {
 
             // Tab contents area
             html += `<div style="padding: 10px 15px;">`;
-            snippets.forEach((snippet, idx) => {
+            fileKeys.forEach((fileType, idx) => {
                 const isActive = idx === 0;
                 html += `
-                    <div class="snippet-file-type-content" data-snippet-id="${escapeHtml(snippet.id)}" style="${isActive ? 'display: block' : 'display: none'}; padding: 10px 0;">
+                    <div class="snippet-file-type-content" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="${isActive ? 'display: block' : 'display: none'}; padding: 10px 0;">
                         <div style="display: flex; gap: 4px;">
-                            <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(snippet.id)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
-                            <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(snippet.id)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
-                            <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(snippet.id)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
+                            <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
+                            <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
+                            <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
                         </div>
                     </div>
                 `;
@@ -1115,12 +1104,34 @@ function loadFileTypeSnippets() {
         html += `</div>`;
     });
 
+    // Process custom snippets (not grouped by type, just show as-is)
+    Object.entries(customSnippets).forEach(([id, snippet]) => {
+        html += `
+            <div style="margin-bottom: 20px; border: 1px solid var(--sn-border); border-radius: 3px; overflow: hidden;">
+                <div style="padding: 12px 15px; background: var(--sn-bg-darker); border-bottom: 1px solid var(--sn-border);">
+                    <strong style="font-size: 13px;">${escapeHtml(snippet.name)}</strong>
+                </div>
+                <div style="padding: 10px 15px;">
+                    <div style="font-size: 11px; color: var(--sn-text-secondary); margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--sn-border);">
+                        ${fileTypes[snippet.fileType || 'general'].label}
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
+                        <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
+                        <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
     fileTypeContainer.innerHTML = html;
 
     // Setup file type tab click handlers
     document.querySelectorAll('.snippet-file-type-tab').forEach(tab => {
         tab.addEventListener('click', function() {
             const snippetId = this.dataset.snippetId;
+            const fileType = this.dataset.fileType;
             const container = this.closest('[style*="border: 1px solid"]');
 
             // Deactivate all tabs in this container
@@ -1141,7 +1152,7 @@ function loadFileTypeSnippets() {
             this.style.fontWeight = 'bold';
 
             // Show corresponding content
-            container.querySelector(`[data-snippet-id="${snippetId}"].snippet-file-type-content`).style.display = 'block';
+            container.querySelector(`[data-snippet-id="${snippetId}"][data-file-type="${fileType}"].snippet-file-type-content`).style.display = 'block';
         });
     });
 }
@@ -1175,19 +1186,30 @@ function addSnippet() {
     showStatus('✓ Snippet added!', 'success');
 }
 
-function copySnippet(id) {
+function copySnippet(id, fileType) {
     const allSnippets = {
         ...defaultSnippets,
         ...JSON.parse(localStorage.getItem(getGlobalStorageKey('customSnippets')) || '{}')
     };
 
     if (allSnippets[id]) {
-        const code = allSnippets[id].code;
-        navigator.clipboard.writeText(code).then(() => {
-            showStatus('✓ Copied to clipboard!', 'success');
-        }).catch(() => {
-            showStatus('Error copying to clipboard', 'error');
-        });
+        let code;
+
+        // Handle default snippets with files structure
+        if (allSnippets[id].files && fileType) {
+            code = allSnippets[id].files[fileType]?.code;
+        } else {
+            // Handle custom snippets with flat code property
+            code = allSnippets[id].code;
+        }
+
+        if (code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showStatus('✓ Copied to clipboard!', 'success');
+            }).catch(() => {
+                showStatus('Error copying to clipboard', 'error');
+            });
+        }
     }
 }
 
