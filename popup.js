@@ -1021,15 +1021,18 @@ function loadSnippets() {
             const fileKeys = Object.keys(snippet.files);
 
             if (fileKeys.length === 1) {
-                // Single file type - show as tab-like button
+                // Single file type - show as centered button with "Add Type" in header
                 const fileType = fileKeys[0];
                 const file = snippet.files[fileType];
                 html += `
-                    <!-- Single file type shown as tab-like format -->
-                    <div style="display: flex; border-bottom: 1px solid var(--sn-border); background: white;">
-                        <button class="snippet-file-type-tab" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; padding: 10px 8px; background: white; color: var(--sn-text-primary); border: none; cursor: pointer; font-size: 11px; font-weight: normal; transition: all 0.2s;">
-                            ${fileTypes[file.fileType].icon} ${fileTypes[file.fileType].label.split(' ')[1] || fileTypes[file.fileType].label}
-                        </button>
+                    <!-- Single file type shown as centered tab -->
+                    <div style="display: flex; border-bottom: 1px solid var(--sn-border); background: white; justify-content: space-between; align-items: center; padding: 0 10px;">
+                        <div style="flex: 1; text-align: center;">
+                            <button class="snippet-file-type-tab" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="padding: 10px 8px; background: white; color: var(--sn-text-primary); border: none; cursor: pointer; font-size: 11px; font-weight: normal; transition: all 0.2s;">
+                                ${fileTypes[file.fileType].icon} ${fileTypes[file.fileType].label.split(' ')[1] || fileTypes[file.fileType].label}
+                            </button>
+                        </div>
+                        <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 0 0 auto; font-size: 11px; padding: 6px 10px; white-space: nowrap;">➕ Add Type</button>
                     </div>
                     <div style="padding: 10px 15px;">
                         <div class="snippet-file-type-content" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="display: none; padding: 10px 0;">
@@ -1038,7 +1041,6 @@ function loadSnippets() {
                                 <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
                                 <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
                                 <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
-                                <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 1; font-size: 11px; padding: 6px;">➕ Add Type</button>
                             </div>
                         </div>
                     </div>
@@ -1046,8 +1048,9 @@ function loadSnippets() {
             } else {
                 // Multiple file types - show tabs at the top (no content expanded on load)
                 html += `
-                    <!-- File type tabs -->
-                    <div style="display: flex; border-bottom: 1px solid var(--sn-border); background: white;">
+                    <!-- File type tabs with Add Type button -->
+                    <div style="display: flex; border-bottom: 1px solid var(--sn-border); background: white; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; flex: 1;">
                 `;
                 fileKeys.forEach((fileType, idx) => {
                     const file = snippet.files[fileType];
@@ -1057,7 +1060,11 @@ function loadSnippets() {
                         </button>
                     `;
                 });
-                html += `</div>`;
+                html += `
+                        </div>
+                        <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 0 0 auto; font-size: 11px; padding: 6px 10px; white-space: nowrap; margin-right: 8px;">➕ Add Type</button>
+                    </div>
+                `;
 
                 // Tab contents area - all hidden on load
                 html += `<div style="padding: 10px 15px;">`;
@@ -1070,7 +1077,6 @@ function loadSnippets() {
                                 <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
                                 <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
                                 <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
-                                <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 1; font-size: 11px; padding: 6px;">➕ Add Type</button>
                             </div>
                         </div>
                     `;
@@ -1083,16 +1089,21 @@ function loadSnippets() {
             const fileType = snippet.fileType || 'general';
 
             html += `
-                <div style="padding: 10px 15px;">
-                    <div style="font-size: 11px; color: var(--sn-text-secondary); margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--sn-border); cursor: pointer;" class="snippet-file-type-label-toggle" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">
-                        ${fileTypes[fileType].label}
+                <!-- Custom single-file snippet with centered label and Add Type button in header -->
+                <div style="display: flex; border-bottom: 1px solid var(--sn-border); background: white; justify-content: space-between; align-items: center; padding: 0 10px;">
+                    <div style="flex: 1; text-align: center;">
+                        <div style="font-size: 11px; color: var(--sn-text-secondary); padding: 10px 8px; cursor: pointer;" class="snippet-file-type-label-toggle" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">
+                            ${fileTypes[fileType].label}
+                        </div>
                     </div>
+                    <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 0 0 auto; font-size: 11px; padding: 6px 10px; white-space: nowrap;">➕ Add Type</button>
+                </div>
+                <div style="padding: 10px 15px;">
                     <pre class="snippet-single-file-code" data-snippet-id="${escapeHtml(id)}" style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0; display: none;">${escapeHtml(code || '')}</pre>
                     <div class="snippet-single-file-actions" data-snippet-id="${escapeHtml(id)}" style="display: none; display: flex; gap: 4px;">
                         <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
                         <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
                         <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
-                        <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 1; font-size: 11px; padding: 6px;">➕ Add Type</button>
                     </div>
                 </div>
             `;
@@ -1931,14 +1942,14 @@ function saveAddFileType() {
     };
 
     // Save the updated snippet
-    if (snippetId in defaultSnippets) {
-        // Create a custom copy
+    if (snippetId in defaultSnippets && !(snippetId in customSnippets)) {
+        // Create a custom copy only if one doesn't exist yet
         const newId = 'snippet_' + Date.now();
         customSnippets[newId] = updatedSnippet;
         localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
         showStatus('✓ File type added! (saved as custom snippet)', 'success');
     } else {
-        // Update existing custom snippet
+        // Update existing custom snippet (or update if it's a custom snippet based on default)
         customSnippets[snippetId] = updatedSnippet;
         localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
         showStatus('✓ File type added!', 'success');
