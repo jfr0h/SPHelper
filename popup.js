@@ -984,7 +984,8 @@ function setupSnippetHandlers() {
             editSnippet(snippetId, fileType);
         } else if (deleteBtn && deleteBtn.closest('.snippet-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
             const snippetId = deleteBtn.dataset.snippetId;
-            deleteSnippetWithConfirm(snippetId);
+            const fileType = deleteBtn.dataset.fileType;
+            deleteFileTypeWithConfirm(snippetId, fileType);
         }
     });
 }
@@ -1459,6 +1460,75 @@ function editSnippet(id, fileType) {
 
         showEditModal(snippetData, 'snippet');
     }
+}
+
+function deleteFileTypeWithConfirm(snippetId, fileType) {
+    const customSnippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
+    const allSnippets = { ...defaultSnippets, ...customSnippets };
+    const snippet = allSnippets[snippetId];
+
+    if (!snippet) return;
+
+    // Get file type label for display
+    const fileTypes = {
+        'general': '📝 General Code',
+        'html': '🏷️ HTML Template',
+        'css': '🎨 CSS/SCSS',
+        'client': '💻 Client Script',
+        'server': '⚙️ Server Script'
+    };
+
+    const fileTypeLabel = fileTypes[fileType] || fileType;
+
+    showConfirmModal(
+        'Delete File Type',
+        `Are you sure you want to delete the ${fileTypeLabel} file from "${snippet.name}"?`,
+        function() {
+            deleteFileType(snippetId, fileType);
+        }
+    );
+}
+
+function deleteFileType(snippetId, fileType) {
+    const customSnippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
+    const allSnippets = { ...defaultSnippets, ...customSnippets };
+    const snippet = allSnippets[snippetId];
+
+    if (!snippet) return;
+
+    // If it's a default snippet, create/update the custom version
+    if (snippetId in defaultSnippets) {
+        // Get or create the custom version
+        if (!customSnippets[snippetId]) {
+            customSnippets[snippetId] = { name: snippet.name, files: { ...snippet.files } };
+        } else if (customSnippets[snippetId] !== null && customSnippets[snippetId].files) {
+            customSnippets[snippetId].files = { ...customSnippets[snippetId].files };
+        }
+    }
+
+    const customSnippet = customSnippets[snippetId];
+    if (!customSnippet || customSnippet === null) return;
+
+    // If snippet has files structure
+    if (customSnippet.files) {
+        delete customSnippet.files[fileType];
+        const remainingFileTypes = Object.keys(customSnippet.files);
+
+        // If no more files, delete the entire snippet
+        if (remainingFileTypes.length === 0) {
+            delete customSnippets[snippetId];
+            showStatus('✓ Snippet deleted (no files remaining)!', 'success');
+        } else {
+            showStatus('✓ File type deleted!', 'success');
+        }
+    } else {
+        // Flat structure - just delete the whole snippet
+        delete customSnippets[snippetId];
+        showStatus('✓ Snippet deleted!', 'success');
+    }
+
+    localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
+    loadSnippets();
 }
 
 function deleteSnippetWithConfirm(id) {
