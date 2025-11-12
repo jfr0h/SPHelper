@@ -679,7 +679,12 @@
             <button class="submenu-btn" data-view="Manage">Add Snippet</button>
         </div>
 
-        <div id="snippetsView" class="snippet-list active"></div>
+        <div id="snippetsView" class="snippet-list active">
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center; padding: 0 10px;">
+                <input type="text" id="snippetSearchInput" placeholder="🔍 Search snippets..." style="flex: 1; padding: 8px 10px; border: 1px solid var(--sn-border); border-radius: 3px; font-size: 13px; font-family: Arial, sans-serif;">
+            </div>
+            <div id="snippetsListContainer"></div>
+        </div>
         <div id="snippetsManage" class="snippet-list">
             <div class="manual-entry-form">
                 <div>
@@ -801,10 +806,34 @@
         </div>
     </div>
 
+    <!-- Add File Type Modal -->
+    <div id="addFileTypeModal" class="modal">
+        <div class="modal-content">
+            <h3>Add File Type to Snippet</h3>
+            <form id="addFileTypeForm">
+                <input type="hidden" id="addFileTypeSnippetId">
+                <label for="addFileTypeSelect">File Type:</label>
+                <select id="addFileTypeSelect" style="width: 100%; padding: 8px 10px; border: 1px solid var(--sn-border); border-radius: 3px; font-size: 13px; font-family: Arial, sans-serif; background: white; color: var(--sn-text-primary); margin-bottom: 12px;">
+                    <option value="general">General Code</option>
+                    <option value="html">HTML Template</option>
+                    <option value="css">CSS/SCSS</option>
+                    <option value="client">Client Script</option>
+                    <option value="server">Server Script</option>
+                </select>
+                <label for="addFileTypeCode">Code:</label>
+                <textarea id="addFileTypeCode" placeholder="Paste code here..." required style="min-height: 120px;"></textarea>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn secondary" id="addFileTypeCancelBtn">Cancel</button>
+                    <button type="button" class="modal-btn primary" id="addFileTypeSaveBtn">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Status Message -->
     <div id="status" class="status"></div>
-    
-    
+
+
     <script src="popup.js"></script>
 </body>
 </html>

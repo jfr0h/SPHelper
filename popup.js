@@ -1004,9 +1004,12 @@ function loadSnippets() {
     let html = '';
 
     Object.entries(allSnippets).forEach(([id, snippet]) => {
+        // Create search data combining snippet name and file types
+        const searchData = `${snippet.name}`.toLowerCase();
+
         // Single container for the entire snippet
         html += `
-            <div style="margin-bottom: 20px; border: 1px solid var(--sn-border); border-radius: 3px; overflow: hidden;">
+            <div class="snippet-item" data-snippet-search="${escapeHtml(searchData)}" style="margin-bottom: 20px; border: 1px solid var(--sn-border); border-radius: 3px; overflow: hidden;">
                 <!-- Header with snippet name -->
                 <div style="padding: 12px 15px; background: var(--sn-bg-darker); border-bottom: 1px solid var(--sn-border);">
                     <strong style="font-size: 13px;">${escapeHtml(snippet.name)}</strong>
@@ -1018,19 +1021,25 @@ function loadSnippets() {
             const fileKeys = Object.keys(snippet.files);
 
             if (fileKeys.length === 1) {
-                // Single file type - no tabs needed
+                // Single file type - show as tab-like button
                 const fileType = fileKeys[0];
                 const file = snippet.files[fileType];
                 html += `
+                    <!-- Single file type shown as tab-like format -->
+                    <div style="display: flex; border-bottom: 1px solid var(--sn-border); background: white;">
+                        <button class="snippet-file-type-tab" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; padding: 10px 8px; background: white; color: var(--sn-text-primary); border: none; cursor: pointer; font-size: 11px; font-weight: normal; transition: all 0.2s;">
+                            ${fileTypes[file.fileType].icon} ${fileTypes[file.fileType].label.split(' ')[1] || fileTypes[file.fileType].label}
+                        </button>
+                    </div>
                     <div style="padding: 10px 15px;">
-                        <div style="font-size: 11px; color: var(--sn-text-secondary); margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--sn-border);">
-                            ${fileTypes[file.fileType || 'general'].label}
-                        </div>
-                        <pre style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0; display: none;">${escapeHtml(file.code)}</pre>
-                        <div style="display: flex; gap: 4px;">
-                            <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px; display: none;">📋 Copy</button>
-                            <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px; display: none;">✏️ Edit</button>
-                            <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px; display: none;">🗑️ Delete</button>
+                        <div class="snippet-file-type-content" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="display: none; padding: 10px 0;">
+                            <pre style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0;">${escapeHtml(file.code)}</pre>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
+                                <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
+                                <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
+                                <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 1; font-size: 11px; padding: 6px;">➕ Add Type</button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1061,6 +1070,7 @@ function loadSnippets() {
                                 <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
                                 <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
                                 <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
+                                <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 1; font-size: 11px; padding: 6px;">➕ Add Type</button>
                             </div>
                         </div>
                     `;
@@ -1082,6 +1092,7 @@ function loadSnippets() {
                         <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
                         <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
                         <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
+                        <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="flex: 1; font-size: 11px; padding: 6px;">➕ Add Type</button>
                     </div>
                 </div>
             `;
@@ -1090,7 +1101,7 @@ function loadSnippets() {
         html += `</div>`;
     });
 
-    document.getElementById('snippetsView').innerHTML = html;
+    document.getElementById('snippetsListContainer').innerHTML = html;
 
     // Setup file type tab click handlers (with toggle/unselect support)
     document.querySelectorAll('.snippet-file-type-tab').forEach(tab => {
@@ -1145,6 +1156,51 @@ function loadSnippets() {
                 codeElement.style.display = isHidden ? 'block' : 'none';
                 actionsElement.style.display = isHidden ? 'flex' : 'none';
             }
+        });
+    });
+
+    // Setup search functionality
+    const searchInput = document.getElementById('snippetSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const snippetItems = document.querySelectorAll('.snippet-item[data-snippet-search]');
+
+            snippetItems.forEach(item => {
+                const searchData = item.dataset.snippetSearch || '';
+                if (searchTerm === '' || searchData.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Setup "Add Type" button handlers
+    document.querySelectorAll('.add-file-type-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const snippetId = this.dataset.snippetId;
+            const allSnippets = { ...defaultSnippets, ...JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}') };
+            const snippet = allSnippets[snippetId];
+
+            if (!snippet) return;
+
+            // Show modal to add a new file type
+            const fileTypeSelect = document.getElementById('addFileTypeSelect');
+            const snippetIdInput = document.getElementById('addFileTypeSnippetId');
+            const codeInput = document.getElementById('addFileTypeCode');
+
+            snippetIdInput.value = snippetId;
+            codeInput.value = '';
+
+            // Disable already-used file types
+            const usedTypes = snippet.files ? Object.keys(snippet.files) : [snippet.fileType || 'general'];
+            Array.from(fileTypeSelect.options).forEach(option => {
+                option.disabled = usedTypes.includes(option.value);
+            });
+
+            document.getElementById('addFileTypeModal').classList.add('active');
         });
     });
 }
@@ -1486,6 +1542,24 @@ function setupVariableHandlers() {
             saveBulkImport();
         });
     }
+
+    // Handle "Add File Type" modal buttons
+    const addFileTypeCancelBtn = document.getElementById('addFileTypeCancelBtn');
+    if (addFileTypeCancelBtn) {
+        addFileTypeCancelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('addFileTypeModal').classList.remove('active');
+        });
+    }
+
+    const addFileTypeSaveBtn = document.getElementById('addFileTypeSaveBtn');
+    if (addFileTypeSaveBtn) {
+        addFileTypeSaveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            saveAddFileType();
+        });
+    }
 }
 
 function setupVariableSearch() {
@@ -1808,6 +1882,70 @@ function closeModal() {
     document.getElementById('editModal').classList.remove('active');
     currentEditingType = null;
     currentEditingId = null;
+}
+
+function saveAddFileType() {
+    const snippetId = document.getElementById('addFileTypeSnippetId').value;
+    const fileType = document.getElementById('addFileTypeSelect').value;
+    const code = document.getElementById('addFileTypeCode').value.trim();
+
+    if (!code) {
+        showStatus('Please enter code', 'error');
+        return;
+    }
+
+    const customSnippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
+    const allSnippets = { ...defaultSnippets, ...customSnippets };
+    const snippet = allSnippets[snippetId];
+
+    if (!snippet) {
+        showStatus('Snippet not found', 'error');
+        return;
+    }
+
+    // Convert flat snippet to nested structure if needed
+    let updatedSnippet;
+    if (snippet.files) {
+        // Already has nested structure
+        updatedSnippet = { ...snippet };
+        updatedSnippet.files = { ...snippet.files };
+    } else {
+        // Convert from flat to nested
+        const existingCode = snippet.code;
+        const existingType = snippet.fileType || 'general';
+        updatedSnippet = {
+            name: snippet.name,
+            files: {
+                [existingType]: {
+                    fileType: existingType,
+                    code: existingCode
+                }
+            }
+        };
+    }
+
+    // Add the new file type
+    updatedSnippet.files[fileType] = {
+        fileType: fileType,
+        code: code
+    };
+
+    // Save the updated snippet
+    if (snippetId in defaultSnippets) {
+        // Create a custom copy
+        const newId = 'snippet_' + Date.now();
+        customSnippets[newId] = updatedSnippet;
+        localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
+        showStatus('✓ File type added! (saved as custom snippet)', 'success');
+    } else {
+        // Update existing custom snippet
+        customSnippets[snippetId] = updatedSnippet;
+        localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
+        showStatus('✓ File type added!', 'success');
+    }
+
+    document.getElementById('addFileTypeModal').classList.remove('active');
+    loadSnippets();
 }
 
 function saveEdit() {
