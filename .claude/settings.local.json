@@ -7,7 +7,8 @@
       "Bash(cmd /c \"type nul > nul.txt && del nul\")",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

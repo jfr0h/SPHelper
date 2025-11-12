@@ -1772,23 +1772,34 @@ function setupVariableHandlers() {
 function setupIDEHandlers() {
     const invertSlider = document.getElementById('invertSlider');
     const invertValue = document.getElementById('invertValue');
-    const saveIDESettingsBtn = document.getElementById('saveIDESettingsBtn');
+    const expandedSizeInput = document.getElementById('expandedSize');
+    const shrunkFlexInput = document.getElementById('shrunkFlex');
+    const expandedFlexInput = document.getElementById('expandedFlex');
 
     // Load saved settings
     loadIDESettings();
 
-    // Update invert value display
+    // Auto-save on invert slider change
     if (invertSlider) {
         invertSlider.addEventListener('input', function() {
             if (invertValue) {
                 invertValue.textContent = Math.round(this.value * 100) + '%';
             }
+            saveIDESettings();
         });
     }
 
-    // Save settings button
-    if (saveIDESettingsBtn) {
-        saveIDESettingsBtn.addEventListener('click', saveIDESettings);
+    // Auto-save on input changes
+    if (expandedSizeInput) {
+        expandedSizeInput.addEventListener('change', saveIDESettings);
+    }
+
+    if (shrunkFlexInput) {
+        shrunkFlexInput.addEventListener('change', saveIDESettings);
+    }
+
+    if (expandedFlexInput) {
+        expandedFlexInput.addEventListener('change', saveIDESettings);
     }
 }
 
