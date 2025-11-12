@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "SPHelper - ServiceNow Tools",
+  "version": "0.1",
+  "description": "ServiceNow widget editing tools with snippet management",
+  "permissions": ["scripting", "activeTab", "storage", "tabs"],
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none';"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*widget_editor*", "*://*/*sp_config*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "SPHelper - ServiceNow Tools",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
