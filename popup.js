@@ -990,7 +990,7 @@ function setupSnippetHandlers() {
 }
 
 function loadSnippets() {
-    const customSnippets = JSON.parse(localStorage.getItem(getGlobalStorageKey('customSnippets')) || '{}');
+    const customSnippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
     const allSnippets = { ...defaultSnippets, ...customSnippets };
 
     const fileTypes = {
@@ -1077,7 +1077,7 @@ function loadSnippets() {
 }
 
 function loadFileTypeSnippets() {
-    const customSnippets = JSON.parse(localStorage.getItem(getGlobalStorageKey('customSnippets')) || '{}');
+    const customSnippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
     const fileTypeContainer = document.getElementById('fileTypeContainer');
 
     if (!fileTypeContainer) return;
@@ -1214,11 +1214,6 @@ function loadFileTypeSnippets() {
 }
 
 function addSnippet() {
-    if (!currentProfile) {
-        showStatus('Please select a profile first', 'error');
-        return;
-    }
-
     const name = document.getElementById('newSnippetName').value.trim();
     const code = document.getElementById('newSnippetCode').value.trim();
     const fileType = document.getElementById('newSnippetType').value;
@@ -1228,11 +1223,12 @@ function addSnippet() {
         return;
     }
 
-    let snippets = JSON.parse(localStorage.getItem(getGlobalStorageKey('customSnippets')) || '{}');
+    // Store snippets globally, not tied to a profile
+    let snippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
     const id = 'snippet_' + Date.now();
     snippets[id] = { name, code, fileType: fileType || 'general' };
 
-    localStorage.setItem(getGlobalStorageKey('customSnippets'), JSON.stringify(snippets));
+    localStorage.setItem('globalCustomSnippets', JSON.stringify(snippets));
     document.getElementById('newSnippetName').value = '';
     document.getElementById('newSnippetCode').value = '';
     document.getElementById('newSnippetType').value = 'general';
@@ -1245,7 +1241,7 @@ function addSnippet() {
 function copySnippet(id, fileType) {
     const allSnippets = {
         ...defaultSnippets,
-        ...JSON.parse(localStorage.getItem(getGlobalStorageKey('customSnippets')) || '{}')
+        ...JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}')
     };
 
     if (allSnippets[id]) {
@@ -1270,7 +1266,7 @@ function copySnippet(id, fileType) {
 }
 
 function editSnippet(id, fileType) {
-    const customSnippets = JSON.parse(localStorage.getItem(getGlobalStorageKey('customSnippets')) || '{}');
+    const customSnippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
     const allSnippets = { ...defaultSnippets, ...customSnippets };
 
     if (allSnippets[id]) {
@@ -1308,9 +1304,9 @@ function deleteSnippet(id) {
         return;
     }
 
-    let snippets = JSON.parse(localStorage.getItem(getGlobalStorageKey('customSnippets')) || '{}');
+    let snippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
     delete snippets[id];
-    localStorage.setItem(getGlobalStorageKey('customSnippets'), JSON.stringify(snippets));
+    localStorage.setItem('globalCustomSnippets', JSON.stringify(snippets));
     loadSnippets();
     loadFileTypeSnippets();
     showStatus('✓ Snippet deleted!', 'success');
@@ -1751,7 +1747,7 @@ function saveEdit() {
     }
 
     if (currentEditingType === 'snippet') {
-        let snippets = JSON.parse(localStorage.getItem(getGlobalStorageKey('customSnippets')) || '{}');
+        let snippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
 
         // If editing a default snippet, create a new custom snippet instead
         if (currentEditingId in defaultSnippets) {
@@ -1764,7 +1760,7 @@ function saveEdit() {
             showStatus('✓ Updated!', 'success');
         }
 
-        localStorage.setItem(getGlobalStorageKey('customSnippets'), JSON.stringify(snippets));
+        localStorage.setItem('globalCustomSnippets', JSON.stringify(snippets));
         loadSnippets();
     } else {
         // Validate variable name
