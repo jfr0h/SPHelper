@@ -678,22 +678,6 @@ function setupProfileHandlers() {
         showInlineProfileForm(profiles[currentProfile]);
     });
 
-    const deleteProfileBtn = document.getElementById('deleteProfileBtn');
-    deleteProfileBtn.addEventListener('click', function() {
-        if (!currentProfile) {
-            showStatus('Please select a profile first', 'error');
-            return;
-        }
-        const profileName = profiles[currentProfile].name;
-        showConfirmModal(
-            'Delete Profile',
-            `Are you sure you want to delete the profile "${profileName}"?\n\nThis action cannot be undone.`,
-            function() {
-                deleteProfile(currentProfile);
-            }
-        );
-    });
-
     openPortalBtn.addEventListener('click', function() {
         if (currentProfile && profiles[currentProfile].link) {
             chrome.tabs.create({ url: profiles[currentProfile].link });
@@ -709,6 +693,24 @@ function setupProfileHandlers() {
     inlineProfileSave.addEventListener('click', function(e) {
         e.preventDefault();
         saveInlineProfile();
+    });
+
+    const inlineProfileDelete = document.getElementById('inlineProfileDelete');
+    inlineProfileDelete.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (!currentEditingProfile) {
+            showStatus('No profile to delete', 'error');
+            return;
+        }
+        const profileName = profiles[currentEditingProfile].name;
+        showConfirmModal(
+            'Delete Profile',
+            `Are you sure you want to delete the profile "${profileName}"?\n\nThis action cannot be undone.`,
+            function() {
+                deleteProfile(currentEditingProfile);
+                closeInlineProfileForm();
+            }
+        );
     });
 
     // Save form state to localStorage to restore if popup is reopened
@@ -804,15 +806,18 @@ function showInlineProfileForm(profileData) {
     const title = document.getElementById('profileFormTitle');
     const nameInput = document.getElementById('inlineProfileName');
     const linkInput = document.getElementById('inlineProfileLink');
+    const deleteBtn = document.getElementById('inlineProfileDelete');
 
     if (profileData) {
         title.textContent = 'Edit Profile';
         nameInput.value = profileData.name;
         linkInput.value = profileData.link;
+        deleteBtn.style.display = 'block';
     } else {
         title.textContent = 'New Profile';
         nameInput.value = localStorage.getItem('tempProfileName') || '';
         linkInput.value = localStorage.getItem('tempProfileLink') || '';
+        deleteBtn.style.display = 'none';
     }
 
     container.style.display = 'block';
