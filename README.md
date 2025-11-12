@@ -13,6 +13,11 @@ A Chrome and Edge browser extension that provides powerful tools for ServiceNow 
   - Add individual variables or bulk import
   - Export variables with custom prefix support
   - Search and filter functionality
+- **Portal IDE Modifications** - Customize ServiceNow widget editor appearance and behavior
+  - Adjust CodeMirror invert filter (0-100%)
+  - Customize expanded editor minimum height
+  - Control flex ratios for expanded and shrunk editors
+  - Settings apply instantly to all open ServiceNow tabs
 - **Profile-Based Access Control** - Features are only available when a profile is selected
 
 ## Installation
@@ -156,6 +161,32 @@ A Chrome and Edge browser extension that provides powerful tools for ServiceNow 
 3. Optionally enter a prefix for the variable names
 4. Click **"Export"**
 5. The variables will be copied to your clipboard
+
+### Portal IDE Modifications
+
+The Portal IDE Modifications section allows you to customize how the ServiceNow widget editor looks and behaves.
+
+#### Customizing Editor Appearance
+
+1. Click **Portal IDE Modifications** from the main menu
+2. Adjust the following settings (changes save automatically):
+   - **CodeMirror Invert** - Slide to adjust the invert filter (0% = normal, 100% = fully inverted)
+   - **Expanded Editor Size** - Set the minimum height (in pixels) when an editor is expanded
+   - **Shrunk Editor Flex** - Control the flex ratio for editors that are not expanded
+   - **Expanded Editor Flex** - Control how much larger expanded editors are compared to shrunk ones
+
+#### How It Works
+
+When you click on a code editor in the ServiceNow widget editor:
+- The clicked editor expands to the size and flex ratio you've configured
+- Other editors shrink using the shrunk flex ratio
+- The invert filter applies to all CodeMirror editors
+- Settings apply immediately to all open ServiceNow tabs
+
+**Example:**
+- If Expanded Flex = 3 and Shrunk Flex = 1
+- Expanded editor takes 3x more space than shrunk editors
+- Click the expanded editor again to shrink it
 
 ## Data Storage
 
