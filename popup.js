@@ -980,7 +980,8 @@ function setupSnippetHandlers() {
             copySnippet(snippetId, fileType);
         } else if (editBtn && editBtn.closest('.snippet-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
             const snippetId = editBtn.dataset.snippetId;
-            editSnippet(snippetId);
+            const fileType = editBtn.dataset.fileType;
+            editSnippet(snippetId, fileType);
         } else if (deleteBtn && deleteBtn.closest('.snippet-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
             const snippetId = deleteBtn.dataset.snippetId;
             deleteSnippetWithConfirm(snippetId);
@@ -991,44 +992,78 @@ function setupSnippetHandlers() {
 function loadSnippets() {
     const customSnippets = JSON.parse(localStorage.getItem(getGlobalStorageKey('customSnippets')) || '{}');
     const allSnippets = { ...defaultSnippets, ...customSnippets };
-    const isCustom = (id) => id in customSnippets;
+
+    const fileTypes = {
+        'general': { label: '📝 General Code', icon: '📝' },
+        'html': { label: '🏷️ HTML Template', icon: '🏷️' },
+        'css': { label: '🎨 CSS/SCSS', icon: '🎨' },
+        'client': { label: '💻 Client Script', icon: '💻' },
+        'server': { label: '⚙️ Server Script', icon: '⚙️' }
+    };
 
     let html = '';
 
     Object.entries(allSnippets).forEach(([id, snippet]) => {
-        let code;
-        let fileType;
-
         // Handle default snippets with files structure
         if (snippet.files) {
             const fileKeys = Object.keys(snippet.files);
-            fileType = fileKeys[0];
-            code = snippet.files[fileType].code;
+
+            // Create container for this snippet pattern
+            html += `
+                <div class="snippet-item">
+                    <div class="snippet-header">
+                        <strong>${escapeHtml(snippet.name)}</strong>
+                    </div>
+            `;
+
+            // Show each file type
+            fileKeys.forEach((fileType) => {
+                const file = snippet.files[fileType];
+
+                html += `
+                    <div style="margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 3px;">
+                        <div style="margin-bottom: 8px; padding: 6px; background: #f5f5f5; border-radius: 3px; font-size: 11px; color: #666; font-weight: bold;">
+                            ${fileTypes[file.fileType].icon} ${fileTypes[file.fileType].label}
+                        </div>
+                        <div class="snippet-code-preview">
+                            <pre>${escapeHtml(file.code)}</pre>
+                        </div>
+                        <div class="snippet-actions">
+                            <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">📋 Copy</button>
+                            <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">✏️ Edit</button>
+                            <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
         } else {
             // Handle custom snippets with flat code property
-            code = snippet.code;
-            fileType = snippet.fileType || 'general';
+            const code = snippet.code;
+            const fileType = snippet.fileType || 'general';
+            const preview = code ? code.substring(0, 50).split('\n')[0] : '';
+
+            html += `
+                <div class="snippet-item">
+                    <div class="snippet-header">
+                        <strong>${escapeHtml(snippet.name)}</strong>
+                        <span class="snippet-preview">${escapeHtml(preview)}${preview.length >= 50 ? '...' : ''}</span>
+                    </div>
+                    <div style="margin-bottom: 10px; padding: 8px; background: #f5f5f5; border-radius: 3px; font-size: 11px; color: #666;">
+                        ${fileTypes[fileType].icon} ${fileTypes[fileType].label}
+                    </div>
+                    <div class="snippet-code-preview">
+                        <pre>${escapeHtml(code || '')}</pre>
+                    </div>
+                    <div class="snippet-actions">
+                        <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">📋 Copy</button>
+                        <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">✏️ Edit</button>
+                        <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}">🗑️ Delete</button>
+                    </div>
+                </div>
+            `;
         }
-
-        const preview = code ? code.substring(0, 50).split('\n')[0] : '';
-        const custom = isCustom(id);
-
-        html += `
-            <div class="snippet-item">
-                <div class="snippet-header">
-                    <strong>${escapeHtml(snippet.name)}</strong>
-                    <span class="snippet-preview">${escapeHtml(preview)}${preview.length >= 50 ? '...' : ''}</span>
-                </div>
-                <div class="snippet-code-preview">
-                    <pre>${escapeHtml(code || '')}</pre>
-                </div>
-                <div class="snippet-actions">
-                    <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">📋 Copy</button>
-                    <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}">✏️ Edit</button>
-                    <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}">🗑️ Delete</button>
-                </div>
-            </div>
-        `;
     });
 
     document.getElementById('snippetsView').innerHTML = html;
@@ -1227,14 +1262,29 @@ function copySnippet(id, fileType) {
     }
 }
 
-function editSnippet(id) {
+function editSnippet(id, fileType) {
     const customSnippets = JSON.parse(localStorage.getItem(getGlobalStorageKey('customSnippets')) || '{}');
     const allSnippets = { ...defaultSnippets, ...customSnippets };
 
     if (allSnippets[id]) {
         currentEditingType = 'snippet';
         currentEditingId = id;
-        showEditModal(allSnippets[id], 'snippet');
+
+        let snippetData = allSnippets[id];
+
+        // Handle default snippets with files structure
+        if (snippetData.files && fileType) {
+            // Extract the specific file type's code
+            const file = snippetData.files[fileType];
+            snippetData = {
+                name: snippetData.name,
+                code: file.code,
+                fileType: file.fileType,
+                _originalFileType: fileType // Store which file type is being edited
+            };
+        }
+
+        showEditModal(snippetData, 'snippet');
     }
 }
 
