@@ -574,6 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupMenuHandlers();
     setupSnippetHandlers();
     setupVariableHandlers();
+    setupIDEHandlers();
     setupConfirmModal();
     setupSnippetHeaderToggle();
     updateMenuButtonStates();
@@ -1766,6 +1767,92 @@ function setupVariableHandlers() {
             saveAddFileType();
         });
     }
+}
+
+function setupIDEHandlers() {
+    const invertSlider = document.getElementById('invertSlider');
+    const invertValue = document.getElementById('invertValue');
+    const saveIDESettingsBtn = document.getElementById('saveIDESettingsBtn');
+
+    // Load saved settings
+    loadIDESettings();
+
+    // Update invert value display
+    if (invertSlider) {
+        invertSlider.addEventListener('input', function() {
+            if (invertValue) {
+                invertValue.textContent = Math.round(this.value * 100) + '%';
+            }
+        });
+    }
+
+    // Save settings button
+    if (saveIDESettingsBtn) {
+        saveIDESettingsBtn.addEventListener('click', saveIDESettings);
+    }
+}
+
+function loadIDESettings() {
+    const settings = JSON.parse(localStorage.getItem('ideSettings') || '{}');
+
+    const invertSlider = document.getElementById('invertSlider');
+    const invertValue = document.getElementById('invertValue');
+    const expandedSizeInput = document.getElementById('expandedSize');
+    const shrunkFlexInput = document.getElementById('shrunkFlex');
+    const expandedFlexInput = document.getElementById('expandedFlex');
+
+    if (settings.invertValue !== undefined && invertSlider) {
+        invertSlider.value = settings.invertValue;
+        if (invertValue) {
+            invertValue.textContent = Math.round(settings.invertValue * 100) + '%';
+        }
+    }
+
+    if (settings.expandedSize && expandedSizeInput) {
+        expandedSizeInput.value = settings.expandedSize;
+    }
+
+    if (settings.shrunkFlex && shrunkFlexInput) {
+        shrunkFlexInput.value = settings.shrunkFlex;
+    }
+
+    if (settings.expandedFlex && expandedFlexInput) {
+        expandedFlexInput.value = settings.expandedFlex;
+    }
+}
+
+function saveIDESettings() {
+    const invertSlider = document.getElementById('invertSlider');
+    const expandedSizeInput = document.getElementById('expandedSize');
+    const shrunkFlexInput = document.getElementById('shrunkFlex');
+    const expandedFlexInput = document.getElementById('expandedFlex');
+
+    const settings = {
+        invertValue: invertSlider ? parseFloat(invertSlider.value) : 1,
+        expandedSize: expandedSizeInput ? parseInt(expandedSizeInput.value) : 600,
+        shrunkFlex: shrunkFlexInput ? parseFloat(shrunkFlexInput.value) : 1,
+        expandedFlex: expandedFlexInput ? parseFloat(expandedFlexInput.value) : 3
+    };
+
+    // Save to chrome.storage.local so content script can access it
+    chrome.storage.local.set({ideSettings: settings}, function() {
+        // Also save to localStorage for quick access in popup
+        localStorage.setItem('ideSettings', JSON.stringify(settings));
+
+        // Send settings to content script
+        chrome.tabs.query({url: '*://*.service-now.com/*'}, function(tabs) {
+            tabs.forEach(tab => {
+                chrome.tabs.sendMessage(tab.id, {
+                    action: 'updateIDESettings',
+                    settings: settings
+                }).catch(() => {
+                    // Tab may not have content script loaded, which is fine
+                });
+            });
+        });
+
+        showStatus('✓ IDE Settings saved!', 'success');
+    });
 }
 
 function setupVariableSearch() {
