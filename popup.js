@@ -1010,10 +1010,13 @@ function loadSnippets() {
         // Single container for the entire snippet
         html += `
             <div class="snippet-item" data-snippet-search="${escapeHtml(searchData)}" style="margin-bottom: 20px; border: 1px solid var(--sn-border); border-radius: 3px; overflow: hidden;">
-                <!-- Header with snippet name and Add File button -->
+                <!-- Header with snippet name and action buttons -->
                 <div style="padding: 12px 15px; background: var(--sn-bg-darker); border-bottom: 1px solid var(--sn-border); display: flex; justify-content: space-between; align-items: center; gap: 12px;">
                     <strong style="font-size: 13px; flex: 1; min-width: 0;">${escapeHtml(snippet.name)}</strong>
-                    <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="font-size: 11px; padding: 6px 10px; white-space: nowrap; flex: 0 0 auto;">➕ Add File</button>
+                    <div style="display: flex; gap: 8px; flex: 0 0 auto;">
+                        <button class="action-btn add-file-type-btn" data-snippet-id="${escapeHtml(id)}" style="font-size: 11px; padding: 6px 10px; white-space: nowrap;">➕ Add File</button>
+                        <button class="action-btn delete-snippet-btn" data-snippet-id="${escapeHtml(id)}" style="font-size: 11px; padding: 6px 10px; white-space: nowrap;">🗑️ Delete</button>
+                    </div>
                 </div>
         `;
 
@@ -1178,7 +1181,7 @@ function loadSnippets() {
         });
     }
 
-    // Setup "Add Type" button handlers
+    // Setup "Add File" button handlers
     document.querySelectorAll('.add-file-type-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const snippetId = this.dataset.snippetId;
@@ -1202,6 +1205,30 @@ function loadSnippets() {
             });
 
             document.getElementById('addFileTypeModal').classList.add('active');
+        });
+    });
+
+    // Setup "Delete Snippet" button handlers
+    document.querySelectorAll('.delete-snippet-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const snippetId = this.dataset.snippetId;
+            const allSnippets = { ...defaultSnippets, ...JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}') };
+            const snippet = allSnippets[snippetId];
+
+            if (!snippet) return;
+
+            // Show confirmation dialog
+            const confirmed = confirm(`Are you sure you want to delete the entire snippet "${escapeHtml(snippet.name)}" and all of its files?\n\nThis action cannot be undone.`);
+
+            if (!confirmed) return;
+
+            // Delete the snippet
+            const customSnippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
+            delete customSnippets[snippetId];
+            localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
+
+            showStatus('✓ Snippet deleted!', 'success');
+            loadSnippets();
         });
     });
 }
