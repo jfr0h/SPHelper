@@ -1021,8 +1021,8 @@ function loadSnippets() {
                 const file = snippet.files[fileType];
 
                 html += `
-                    <div style="margin-bottom: 10px; padding: 8px; background: #f5f5f5; border-radius: 3px; font-size: 11px; color: #666; font-weight: bold;">
-                        ${fileTypes[file.fileType].icon} ${fileTypes[file.fileType].label}
+                    <div style="margin-bottom: 10px; padding: 8px; background: #f5f5f5; border-radius: 3px; font-size: 11px; color: #666; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;" class="file-type-label-clickable" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">
+                        <span>${fileTypes[file.fileType].label}</span>
                     </div>
                     <div class="snippet-code-preview">
                         <pre>${escapeHtml(file.code)}</pre>
@@ -1065,6 +1065,15 @@ function loadSnippets() {
     });
 
     document.getElementById('snippetsView').innerHTML = html;
+
+    // Setup file type label click handlers to show code in detail view
+    document.querySelectorAll('.file-type-label-clickable').forEach(label => {
+        label.addEventListener('click', function() {
+            const snippetId = this.dataset.snippetId;
+            const fileType = this.dataset.fileType;
+            editSnippet(snippetId, fileType);
+        });
+    });
 }
 
 function loadFileTypeSnippets() {
