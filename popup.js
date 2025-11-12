@@ -1024,10 +1024,10 @@ function loadSnippets() {
                     <div style="margin-bottom: 10px; padding: 8px; background: #f5f5f5; border-radius: 3px; font-size: 11px; color: #666; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;" class="file-type-label-clickable" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">
                         <span>${fileTypes[file.fileType].label}</span>
                     </div>
-                    <div class="snippet-code-preview">
+                    <div class="snippet-code-preview" style="display: none;">
                         <pre>${escapeHtml(file.code)}</pre>
                     </div>
-                    <div class="snippet-actions">
+                    <div class="snippet-actions" style="display: none;">
                         <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">📋 Copy</button>
                         <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">✏️ Edit</button>
                         <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}">🗑️ Delete</button>
@@ -1066,12 +1066,22 @@ function loadSnippets() {
 
     document.getElementById('snippetsView').innerHTML = html;
 
-    // Setup file type label click handlers to show code in detail view
+    // Setup file type label click handlers to toggle code visibility
     document.querySelectorAll('.file-type-label-clickable').forEach(label => {
         label.addEventListener('click', function() {
-            const snippetId = this.dataset.snippetId;
-            const fileType = this.dataset.fileType;
-            editSnippet(snippetId, fileType);
+            const codePreview = this.nextElementSibling;
+            const actions = codePreview ? codePreview.nextElementSibling : null;
+
+            if (codePreview && codePreview.classList.contains('snippet-code-preview')) {
+                // Toggle code visibility
+                const isHidden = codePreview.style.display === 'none';
+                codePreview.style.display = isHidden ? 'block' : 'none';
+
+                // Toggle actions visibility
+                if (actions && actions.classList.contains('snippet-actions')) {
+                    actions.style.display = isHidden ? 'block' : 'none';
+                }
+            }
         });
     });
 }
