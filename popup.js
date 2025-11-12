@@ -678,6 +678,22 @@ function setupProfileHandlers() {
         showInlineProfileForm(profiles[currentProfile]);
     });
 
+    const deleteProfileBtn = document.getElementById('deleteProfileBtn');
+    deleteProfileBtn.addEventListener('click', function() {
+        if (!currentProfile) {
+            showStatus('Please select a profile first', 'error');
+            return;
+        }
+        const profileName = profiles[currentProfile].name;
+        showConfirmModal(
+            'Delete Profile',
+            `Are you sure you want to delete the profile "${profileName}"?\n\nThis action cannot be undone.`,
+            function() {
+                deleteProfile(currentProfile);
+            }
+        );
+    });
+
     openPortalBtn.addEventListener('click', function() {
         if (currentProfile && profiles[currentProfile].link) {
             chrome.tabs.create({ url: profiles[currentProfile].link });
@@ -866,6 +882,37 @@ function restoreProfileFormState() {
             showInlineProfileForm(null);
         }
     }
+}
+
+function deleteProfile(profileId) {
+    if (!profileId || !profiles[profileId]) {
+        showStatus('Profile not found', 'error');
+        return;
+    }
+
+    // Get profile info before deleting
+    const profileName = profiles[profileId].name;
+
+    // Delete the profile
+    delete profiles[profileId];
+    localStorage.setItem('profiles', JSON.stringify(profiles));
+
+    // Clear current profile if it was deleted
+    if (currentProfile === profileId) {
+        currentProfile = null;
+        localStorage.removeItem('currentProfile');
+    }
+
+    // Update the profile select dropdown
+    updateProfileSelect();
+
+    // Update menu button states
+    updateMenuButtonStates();
+
+    // Reset to main menu
+    showSection('mainMenu');
+
+    showStatus(`✓ Profile "${profileName}" deleted!`, 'success');
 }
 
 // ===== CONFIRMATION MODAL =====
