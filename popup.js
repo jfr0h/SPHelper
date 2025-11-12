@@ -576,6 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupVariableHandlers();
     setupConfirmModal();
     setupSnippetHeaderToggle();
+    updateMenuButtonStates();
     restoreMenuState();
     restoreProfileFormState();
     restoreBulkImportModal();
@@ -651,9 +652,12 @@ function setupProfileHandlers() {
         if (currentProfile) {
             localStorage.setItem('currentProfile', currentProfile);
             updateOpenPortalBtn();
+            updateMenuButtonStates();
             loadSnippets();
             loadVariables();
             showSection('mainMenu');
+        } else {
+            updateMenuButtonStates();
         }
         // Hide form if visible
         inlineFormContainer.style.display = 'none';
@@ -735,14 +739,16 @@ function saveProfile() {
         return;
     }
 
+    let newProfileId = null;
+
     if (currentEditingProfile) {
         // Update existing profile
         profiles[currentEditingProfile].name = name;
         profiles[currentEditingProfile].link = link;
     } else {
         // Create new profile
-        const id = 'profile_' + Date.now();
-        profiles[id] = {
+        newProfileId = 'profile_' + Date.now();
+        profiles[newProfileId] = {
             name: name,
             link: link
         };
@@ -750,6 +756,18 @@ function saveProfile() {
 
     localStorage.setItem('profiles', JSON.stringify(profiles));
     updateProfileSelect();
+
+    // Auto-select new profile
+    if (newProfileId) {
+        currentProfile = newProfileId;
+        localStorage.setItem('currentProfile', currentProfile);
+        document.getElementById('profileSelect').value = newProfileId;
+        updateMenuButtonStates();
+        loadSnippets();
+        loadVariables();
+        showSection('mainMenu');
+    }
+
     closeProfileModal();
     showStatus('✓ Profile saved!', 'success');
 }
@@ -803,18 +821,32 @@ function saveInlineProfile() {
         return;
     }
 
+    let newProfileId = null;
+
     if (currentEditingProfile) {
         // Update existing profile
         profiles[currentEditingProfile].name = name;
         profiles[currentEditingProfile].link = link;
     } else {
         // Create new profile
-        const id = 'profile_' + Date.now();
-        profiles[id] = { name: name, link: link };
+        newProfileId = 'profile_' + Date.now();
+        profiles[newProfileId] = { name: name, link: link };
     }
 
     localStorage.setItem('profiles', JSON.stringify(profiles));
     updateProfileSelect();
+
+    // Auto-select new profile
+    if (newProfileId) {
+        currentProfile = newProfileId;
+        localStorage.setItem('currentProfile', currentProfile);
+        document.getElementById('profileSelect').value = newProfileId;
+        updateMenuButtonStates();
+        loadSnippets();
+        loadVariables();
+        showSection('mainMenu');
+    }
+
     closeInlineProfileForm();
     currentEditingProfile = null;
     showStatus('✓ Profile saved!', 'success');
@@ -890,11 +922,38 @@ function setupSnippetHeaderToggle() {
 }
 
 // ===== MENU & NAVIGATION =====
+function updateMenuButtonStates() {
+    // Disable/enable variables button based on profile selection
+    const variablesBtn = document.querySelector('.menu-btn[data-menu="variables"]');
+    const variablesWarning = document.getElementById('variablesWarning');
+
+    if (variablesBtn) {
+        if (currentProfile) {
+            variablesBtn.disabled = false;
+            variablesBtn.style.opacity = '1';
+            variablesBtn.style.cursor = 'pointer';
+            if (variablesWarning) variablesWarning.style.display = 'none';
+        } else {
+            variablesBtn.disabled = true;
+            variablesBtn.style.opacity = '0.5';
+            variablesBtn.style.cursor = 'not-allowed';
+            if (variablesWarning) variablesWarning.style.display = 'block';
+        }
+    }
+}
+
 function setupMenuHandlers() {
     // Main menu buttons
     document.querySelectorAll('.menu-btn[data-menu]').forEach(btn => {
         btn.addEventListener('click', function() {
             const menu = this.dataset.menu;
+
+            // Prevent accessing variables section without a profile
+            if (menu === 'variables' && !currentProfile) {
+                showStatus('Please select a profile first', 'error');
+                return;
+            }
+
             showSection(menu + 'Section');
             saveMenuState(menu + 'Section', 'menu', null);
 
@@ -974,15 +1033,15 @@ function setupSnippetHandlers() {
         const editBtn = e.target.closest('.edit-btn');
         const deleteBtn = e.target.closest('.delete-btn');
 
-        if (copyBtn && copyBtn.closest('.snippet-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
+        if (copyBtn && copyBtn.closest('.snippet-actions, .snippet-single-file-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
             const snippetId = copyBtn.dataset.snippetId;
             const fileType = copyBtn.dataset.fileType;
             copySnippet(snippetId, fileType);
-        } else if (editBtn && editBtn.closest('.snippet-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
+        } else if (editBtn && editBtn.closest('.snippet-actions, .snippet-single-file-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
             const snippetId = editBtn.dataset.snippetId;
             const fileType = editBtn.dataset.fileType;
             editSnippet(snippetId, fileType);
-        } else if (deleteBtn && deleteBtn.closest('.snippet-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
+        } else if (deleteBtn && deleteBtn.closest('.snippet-actions, .snippet-single-file-actions, [id*="fileType"], [class*="snippet-file-type"]')) {
             const snippetId = deleteBtn.dataset.snippetId;
             const fileType = deleteBtn.dataset.fileType;
             deleteFileTypeWithConfirm(snippetId, fileType);
@@ -1045,7 +1104,6 @@ function loadSnippets() {
                             <div style="display: flex; gap: 4px;">
                                 <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
                                 <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
-                                <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
                             </div>
                         </div>
                     </div>
@@ -1100,7 +1158,6 @@ function loadSnippets() {
                     <div class="snippet-single-file-actions" data-snippet-id="${escapeHtml(id)}" style="display: none; display: flex; gap: 4px;">
                         <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
                         <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
-                        <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
                     </div>
                 </div>
             `;
@@ -1407,6 +1464,31 @@ function addSnippet() {
     loadSnippets();
     loadFileTypeSnippets();
     showStatus('✓ Snippet added!', 'success');
+
+    // Switch to View tab and scroll to bottom
+    setTimeout(() => {
+        const viewBtn = document.querySelector('.submenu-btn[data-view="View"]');
+        const manageBtn = document.querySelector('.submenu-btn[data-view="Manage"]');
+        const snippetsView = document.getElementById('snippetsView');
+        const snippetsManage = document.getElementById('snippetsManage');
+
+        if (viewBtn && manageBtn && snippetsView && snippetsManage) {
+            viewBtn.classList.add('active');
+            manageBtn.classList.remove('active');
+            snippetsView.classList.add('active');
+            snippetsManage.classList.remove('active');
+
+            // Scroll to the newly created snippet (last one in the list)
+            const container = document.getElementById('snippetsListContainer');
+            if (container) {
+                const snippetItems = container.querySelectorAll('.snippet-item');
+                if (snippetItems.length > 0) {
+                    const lastSnippet = snippetItems[snippetItems.length - 1];
+                    lastSnippet.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+            }
+        }
+    }, 50);
 }
 
 function copySnippet(id, fileType) {
@@ -1480,9 +1562,22 @@ function deleteFileTypeWithConfirm(snippetId, fileType) {
 
     const fileTypeLabel = fileTypes[fileType] || fileType;
 
+    // Check if this is the only file type
+    let fileTypeCount = 0;
+    if (snippet.files) {
+        fileTypeCount = Object.keys(snippet.files).length;
+    } else if (snippet.code) {
+        fileTypeCount = 1;
+    }
+
+    let message = `Are you sure you want to delete the ${fileTypeLabel} file from "${snippet.name}"?`;
+    if (fileTypeCount === 1) {
+        message += '\n\nThis is the only file in this snippet. The entire snippet will be deleted.';
+    }
+
     showConfirmModal(
         'Delete File Type',
-        `Are you sure you want to delete the ${fileTypeLabel} file from "${snippet.name}"?`,
+        message,
         function() {
             deleteFileType(snippetId, fileType);
         }
@@ -1740,14 +1835,39 @@ function getCSSSyntax(name, prefix = '') {
     return cssVarName;
 }
 
+function hideVariablesSearchAndExport() {
+    const searchInput = document.getElementById('variableSearchInput');
+    const actionsContainer = document.getElementById('variablesViewActions');
+
+    if (searchInput) searchInput.style.display = 'none';
+    if (actionsContainer) actionsContainer.style.display = 'none';
+}
+
+function showVariablesSearchAndExport() {
+    const searchInput = document.getElementById('variableSearchInput');
+    const actionsContainer = document.getElementById('variablesViewActions');
+
+    if (searchInput) searchInput.style.display = '';
+    if (actionsContainer) actionsContainer.style.display = 'flex';
+}
+
 function loadVariables() {
     if (!currentProfile) {
         document.getElementById('variablesListContainer').innerHTML = '';
-        updateExportBtn();
+        hideVariablesSearchAndExport();
         return;
     }
 
     const variables = JSON.parse(localStorage.getItem(getStorageKey('cssVariables')) || '{}');
+    const variableCount = Object.keys(variables).length;
+
+    if (variableCount === 0) {
+        // No variables, hide search and export
+        document.getElementById('variablesListContainer').innerHTML = '';
+        hideVariablesSearchAndExport();
+        return;
+    }
+
     const exportPrefix = localStorage.getItem(getStorageKey('exportPrefix')) || '';
     window.allVariables = variables; // Store for search functionality
 
@@ -1777,6 +1897,7 @@ function loadVariables() {
     });
 
     document.getElementById('variablesListContainer').innerHTML = html;
+    showVariablesSearchAndExport();
     updateExportBtn();
     setupVariableSearch();
 }
