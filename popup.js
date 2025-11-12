@@ -1932,18 +1932,11 @@ function saveAddFileType() {
     };
 
     // Save the updated snippet
-    if (snippetId in defaultSnippets && !(snippetId in customSnippets)) {
-        // Create a custom copy only if one doesn't exist yet
-        const newId = 'snippet_' + Date.now();
-        customSnippets[newId] = updatedSnippet;
-        localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
-        showStatus('✓ File type added! (saved as custom snippet)', 'success');
-    } else {
-        // Update existing custom snippet (or update if it's a custom snippet based on default)
-        customSnippets[snippetId] = updatedSnippet;
-        localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
-        showStatus('✓ File type added!', 'success');
-    }
+    // Always save with the same ID to avoid duplicates
+    // If it's a default snippet, we save it to customSnippets with same ID (acts as override)
+    customSnippets[snippetId] = updatedSnippet;
+    localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
+    showStatus('✓ File type added!', 'success');
 
     document.getElementById('addFileTypeModal').classList.remove('active');
     loadSnippets();
