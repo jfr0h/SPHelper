@@ -1004,6 +1004,9 @@ function loadSnippets() {
     let html = '';
 
     Object.entries(allSnippets).forEach(([id, snippet]) => {
+        // Skip deleted snippets (marked as null)
+        if (snippet === null) return;
+
         // Create search data combining snippet name and file types
         const searchData = `${snippet.name}`.toLowerCase();
 
@@ -1217,18 +1220,28 @@ function loadSnippets() {
 
             if (!snippet) return;
 
-            // Show confirmation dialog
-            const confirmed = confirm(`Are you sure you want to delete the entire snippet "${escapeHtml(snippet.name)}" and all of its files?\n\nThis action cannot be undone.`);
+            // Show confirmation modal (same as variables)
+            showConfirmModal(
+                'Delete Snippet',
+                `Are you sure you want to delete "${snippet.name}" and all of its files?\n\nThis action cannot be undone.`,
+                function() {
+                    // Delete the snippet
+                    const customSnippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
 
-            if (!confirmed) return;
+                    if (snippetId in defaultSnippets) {
+                        // For default snippets, save a deletion marker to hide them
+                        customSnippets[snippetId] = null;
+                    } else {
+                        // For custom snippets, just delete them
+                        delete customSnippets[snippetId];
+                    }
 
-            // Delete the snippet
-            const customSnippets = JSON.parse(localStorage.getItem('globalCustomSnippets') || '{}');
-            delete customSnippets[snippetId];
-            localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
+                    localStorage.setItem('globalCustomSnippets', JSON.stringify(customSnippets));
 
-            showStatus('✓ Snippet deleted!', 'success');
-            loadSnippets();
+                    showStatus('✓ Snippet deleted!', 'success');
+                    loadSnippets();
+                }
+            );
         });
     });
 }
