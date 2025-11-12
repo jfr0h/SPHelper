@@ -996,7 +996,21 @@ function loadSnippets() {
     let html = '';
 
     Object.entries(allSnippets).forEach(([id, snippet]) => {
-        const preview = snippet.code.substring(0, 50).split('\n')[0];
+        let code;
+        let fileType;
+
+        // Handle default snippets with files structure
+        if (snippet.files) {
+            const fileKeys = Object.keys(snippet.files);
+            fileType = fileKeys[0];
+            code = snippet.files[fileType].code;
+        } else {
+            // Handle custom snippets with flat code property
+            code = snippet.code;
+            fileType = snippet.fileType || 'general';
+        }
+
+        const preview = code ? code.substring(0, 50).split('\n')[0] : '';
         const custom = isCustom(id);
 
         html += `
@@ -1006,10 +1020,10 @@ function loadSnippets() {
                     <span class="snippet-preview">${escapeHtml(preview)}${preview.length >= 50 ? '...' : ''}</span>
                 </div>
                 <div class="snippet-code-preview">
-                    <pre>${escapeHtml(snippet.code)}</pre>
+                    <pre>${escapeHtml(code || '')}</pre>
                 </div>
                 <div class="snippet-actions">
-                    <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}">📋 Copy</button>
+                    <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">📋 Copy</button>
                     <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}">✏️ Edit</button>
                     <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}">🗑️ Delete</button>
                 </div>
