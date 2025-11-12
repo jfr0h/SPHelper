@@ -1004,84 +1004,122 @@ function loadSnippets() {
     let html = '';
 
     Object.entries(allSnippets).forEach(([id, snippet]) => {
-        // Handle default snippets with files structure
+        // Single container for the entire snippet
+        html += `
+            <div style="margin-bottom: 20px; border: 1px solid var(--sn-border); border-radius: 3px; overflow: hidden;">
+                <!-- Header with snippet name -->
+                <div style="padding: 12px 15px; background: var(--sn-bg-darker); border-bottom: 1px solid var(--sn-border);">
+                    <strong style="font-size: 13px;">${escapeHtml(snippet.name)}</strong>
+                </div>
+        `;
+
         if (snippet.files) {
+            // Handle default snippets with files structure
             const fileKeys = Object.keys(snippet.files);
 
-            // Create header for this snippet pattern
-            html += `
-                <div class="snippet-item">
-                    <div class="snippet-header">
-                        <strong>${escapeHtml(snippet.name)}</strong>
-                    </div>
-            `;
-
-            // Show each file type as a separate row
-            fileKeys.forEach((fileType) => {
+            if (fileKeys.length === 1) {
+                // Single file type - no tabs needed
+                const fileType = fileKeys[0];
                 const file = snippet.files[fileType];
-
                 html += `
-                    <div style="margin-bottom: 10px; padding: 8px; background: #f5f5f5; border-radius: 3px; font-size: 11px; color: #666; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;" class="file-type-label-clickable" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">
-                        <span>${fileTypes[file.fileType].label}</span>
-                    </div>
-                    <div class="snippet-code-preview" style="display: none;">
-                        <pre>${escapeHtml(file.code)}</pre>
-                    </div>
-                    <div class="snippet-actions" style="display: none;">
-                        <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">📋 Copy</button>
-                        <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">✏️ Edit</button>
-                        <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}">🗑️ Delete</button>
+                    <div style="padding: 10px 15px;">
+                        <div style="font-size: 11px; color: var(--sn-text-secondary); margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--sn-border);">
+                            ${fileTypes[file.fileType || 'general'].label}
+                        </div>
+                        <pre style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0;">${escapeHtml(file.code)}</pre>
+                        <div style="display: flex; gap: 4px;">
+                            <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
+                            <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
+                            <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
+                        </div>
                     </div>
                 `;
-            });
+            } else {
+                // Multiple file types - show tabs at the top
+                html += `
+                    <!-- File type tabs -->
+                    <div style="display: flex; border-bottom: 1px solid var(--sn-border); background: white;">
+                `;
+                fileKeys.forEach((fileType, idx) => {
+                    const file = snippet.files[fileType];
+                    const isActive = idx === 0;
+                    html += `
+                        <button class="snippet-file-type-tab" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; padding: 10px 8px; border-right: ${idx < fileKeys.length - 1 ? '1px solid var(--sn-border)' : 'none'}; background: ${isActive ? 'var(--sn-secondary)' : 'white'}; color: ${isActive ? 'white' : 'var(--sn-text-primary)'}; border: none; cursor: pointer; font-size: 11px; font-weight: ${isActive ? 'bold' : 'normal'}; transition: all 0.2s;">
+                            ${fileTypes[file.fileType].icon} ${fileTypes[file.fileType].label.split(' ')[1] || fileTypes[file.fileType].label}
+                        </button>
+                    `;
+                });
+                html += `</div>`;
 
-            html += `</div>`;
+                // Tab contents area
+                html += `<div style="padding: 10px 15px;">`;
+                fileKeys.forEach((fileType, idx) => {
+                    const file = snippet.files[fileType];
+                    const isActive = idx === 0;
+                    html += `
+                        <div class="snippet-file-type-content" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="${isActive ? 'display: block' : 'display: none'}; padding: 10px 0;">
+                            <pre style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0;">${escapeHtml(file.code)}</pre>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
+                                <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
+                                <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
         } else {
             // Handle custom snippets with flat code property
             const code = snippet.code;
             const fileType = snippet.fileType || 'general';
-            const preview = code ? code.substring(0, 50).split('\n')[0] : '';
 
             html += `
-                <div class="snippet-item">
-                    <div class="snippet-header">
-                        <strong>${escapeHtml(snippet.name)}</strong>
-                        <span class="snippet-preview">${escapeHtml(preview)}${preview.length >= 50 ? '...' : ''}</span>
+                <div style="padding: 10px 15px;">
+                    <div style="font-size: 11px; color: var(--sn-text-secondary); margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--sn-border);">
+                        ${fileTypes[fileType].label}
                     </div>
-                    <div style="margin-bottom: 10px; padding: 8px; background: #f5f5f5; border-radius: 3px; font-size: 11px; color: #666;">
-                        ${fileTypes[fileType].icon} ${fileTypes[fileType].label}
-                    </div>
-                    <div class="snippet-code-preview">
-                        <pre>${escapeHtml(code || '')}</pre>
-                    </div>
-                    <div class="snippet-actions">
-                        <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">📋 Copy</button>
-                        <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}">✏️ Edit</button>
-                        <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}">🗑️ Delete</button>
+                    <pre style="background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px; line-height: 1.4; margin: 10px 0;">${escapeHtml(code || '')}</pre>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="action-btn copy-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">📋 Copy</button>
+                        <button class="action-btn edit-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">✏️ Edit</button>
+                        <button class="action-btn delete-btn" data-snippet-id="${escapeHtml(id)}" data-file-type="${escapeHtml(fileType)}" style="flex: 1; font-size: 11px; padding: 6px;">🗑️ Delete</button>
                     </div>
                 </div>
             `;
         }
+
+        html += `</div>`;
     });
 
     document.getElementById('snippetsView').innerHTML = html;
 
-    // Setup file type label click handlers to toggle code visibility
-    document.querySelectorAll('.file-type-label-clickable').forEach(label => {
-        label.addEventListener('click', function() {
-            const codePreview = this.nextElementSibling;
-            const actions = codePreview ? codePreview.nextElementSibling : null;
+    // Setup file type tab click handlers
+    document.querySelectorAll('.snippet-file-type-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const snippetId = this.dataset.snippetId;
+            const fileType = this.dataset.fileType;
+            const container = this.closest('[style*="border: 1px solid"]');
 
-            if (codePreview && codePreview.classList.contains('snippet-code-preview')) {
-                // Toggle code visibility
-                const isHidden = codePreview.style.display === 'none';
-                codePreview.style.display = isHidden ? 'block' : 'none';
+            // Deactivate all tabs in this container
+            container.querySelectorAll('.snippet-file-type-tab').forEach(t => {
+                t.style.background = 'white';
+                t.style.color = 'var(--sn-text-primary)';
+                t.style.fontWeight = 'normal';
+            });
 
-                // Toggle actions visibility
-                if (actions && actions.classList.contains('snippet-actions')) {
-                    actions.style.display = isHidden ? 'block' : 'none';
-                }
-            }
+            // Hide all contents
+            container.querySelectorAll('.snippet-file-type-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Activate clicked tab
+            this.style.background = 'var(--sn-secondary)';
+            this.style.color = 'white';
+            this.style.fontWeight = 'bold';
+
+            // Show corresponding content
+            container.querySelector(`[data-snippet-id="${snippetId}"][data-file-type="${fileType}"].snippet-file-type-content`).style.display = 'block';
         });
     });
 }
